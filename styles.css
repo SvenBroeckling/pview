@@ -310,12 +310,36 @@ button:active {
   background: linear-gradient(130deg, var(--node-head-bg-a), var(--node-head-bg-b));
   border-bottom: 1px solid var(--node-border);
   padding: 0.58rem 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
 }
 
 .node-title {
   margin: 0;
   font-size: 1rem;
   color: var(--node-head-text);
+}
+
+.node-close {
+  border: 1px solid color-mix(in srgb, var(--node-border) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--node-bg) 85%, transparent 15%);
+  color: var(--node-head-text);
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.node-close:hover {
+  filter: brightness(1.03);
 }
 
 .hidden-relation-link {

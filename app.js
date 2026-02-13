@@ -487,6 +487,20 @@ function renderNodes(visibleModels) {
     title.textContent = model.name;
     head.appendChild(title);
 
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "node-close";
+    closeBtn.setAttribute("aria-label", `Hide ${model.name}`);
+    closeBtn.textContent = "x";
+    closeBtn.addEventListener("mousedown", (event) => event.stopPropagation());
+    closeBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      state.selectedModels.delete(model.name);
+      renderModelSelectionPanel();
+      renderGraph();
+    });
+    head.appendChild(closeBtn);
+
     const body = document.createElement("div");
     body.className = "node-body";
 
