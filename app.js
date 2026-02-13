@@ -21,6 +21,47 @@ const WORLD_CENTER = { x: 2600, y: 2600 };
 const NODE_WIDTH = 300;
 const SPIRAL_SPACING = 240;
 
+const DEMO_SCHEMA = `datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  posts     Post[]
+  comments  Comment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean   @default(false)
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
+}`;
+
 const state = {
   parsed: null,
   nodePositions: {},
@@ -632,6 +673,15 @@ function readLocalFile(file) {
   reader.readAsText(file);
 }
 
+function loadDemoSchema() {
+  loadSchemaText(DEMO_SCHEMA, "demo schema");
+  if (!state.parsed) return;
+  state.selectedModels = new Set(state.parsed.models.map((model) => model.name));
+  renderModelSelectionPanel();
+  renderGraph();
+  fitView();
+}
+
 schemaInput.addEventListener("change", (event) => {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
@@ -770,5 +820,4 @@ window.addEventListener("mouseup", () => {
 });
 
 initializeTheme();
-centerViewOnWorldPoint(WORLD_CENTER, 0.85);
-updateEmptyState();
+loadDemoSchema();
