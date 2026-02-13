@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prisma Schema Graph Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h1>Prisma Graph Viewer</h1>
+          <p>Client-side parser and model graph explorer.</p>
+        </div>
+
+        <div class="controls card">
+          <label class="upload-label" for="schemaInput">Open Prisma Schema</label>
+          <input id="schemaInput" type="file" accept=".prisma,.txt" />
+          <button id="loadExampleBtn" type="button">Load `schema.prisma`</button>
+          <button id="fitViewBtn" type="button">Fit Graph</button>
+          <label class="toggle-row" for="darkModeToggle">
+            <input id="darkModeToggle" type="checkbox" />
+            <span>Dark mode</span>
+          </label>
+          <p id="statusText" class="status">No schema loaded yet.</p>
+        </div>
+
+        <div class="card">
+          <h2>Model Selection</h2>
+          <div class="model-actions">
+            <button id="selectAllModelsBtn" class="secondary" type="button">Select all</button>
+            <button id="clearModelsBtn" class="secondary" type="button">Clear all</button>
+          </div>
+          <input id="modelSearchInput" class="model-search-input" type="text" placeholder="Search models..." />
+          <p id="modelSelectionHint" class="small-note">Load a schema to choose models.</p>
+          <div id="modelList" class="model-list"></div>
+        </div>
+
+        <div class="card">
+          <h2>Schema Overview</h2>
+          <div id="schemaInfo" class="info-grid">
+            <div class="placeholder">Upload a `.prisma` file to see details.</div>
+          </div>
+        </div>
+
+        <div class="card small-print">
+          <h2>Mouse Controls</h2>
+          <ul>
+            <li>Mouse wheel on graph: zoom</li>
+            <li>Left-drag background: pan</li>
+            <li>Left-drag node: move node</li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <div id="graphViewport" class="graph-viewport">
+          <div id="graphStage" class="graph-stage">
+            <svg id="edgeLayer" class="edge-layer"></svg>
+            <div id="relationStubLayer" class="relation-stub-layer"></div>
+            <div id="nodeLayer" class="node-layer"></div>
+          </div>
+          <div id="emptyState" class="empty-state">
+            <h2>Upload a Prisma schema and choose models to render</h2>
+            <p>Only selected models appear in the graph.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
