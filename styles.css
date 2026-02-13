@@ -276,6 +276,14 @@ button:active {
   pointer-events: none;
 }
 
+.edge-label {
+  font-size: 0.7rem;
+  fill: var(--text-muted);
+  paint-order: stroke;
+  stroke: var(--graph-bg);
+  stroke-width: 3px;
+}
+
 .relation-stub-layer {
   position: absolute;
   inset: 0;

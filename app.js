@@ -375,12 +375,28 @@ function addHiddenRelationToGraph(sourceModel, relation, sourcePos, slotIndex) {
   relationStubLayer.appendChild(revealBtn);
 }
 
+function getRelationEdgeLabel(sideA, sideB) {
+  const aList = sideA && sideA.isList;
+  const bList = sideB && sideB.isList;
+  let kind = "1:1";
+  if (aList && bList) {
+    kind = "N:M";
+  } else if (aList || bList) {
+    kind = "1:N";
+  }
+
+  const optional = (sideA && sideA.isOptional) || (sideB && sideB.isOptional);
+  return optional ? `${kind} (optional)` : kind;
+}
+
 function renderEdges(visibleModels) {
   edgeLayer.innerHTML = "";
   relationStubLayer.innerHTML = "";
 
   const visibleSet = new Set(visibleModels.map((m) => m.name));
   const modelMap = new Map(visibleModels.map((m) => [m.name, m]));
+
+  const relationMap = new Map();
 
   visibleModels.forEach((model) => {
     const fromPos = state.nodePositions[model.name];
@@ -394,24 +410,46 @@ function renderEdges(visibleModels) {
         return;
       }
 
-      const toModel = modelMap.get(relation.to);
-      const toPos = toModel ? state.nodePositions[toModel.name] : null;
-      if (!toPos) return;
-
-      const x1 = fromPos.x + fromPos.width;
-      const y1 = fromPos.y + fromPos.height / 2;
-      const x2 = toPos.x;
-      const y2 = toPos.y + toPos.height / 2;
-      const bend = Math.max(40, Math.abs(x2 - x1) * 0.45);
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "var(--edge)");
-      path.setAttribute("stroke-width", "1.3");
-      path.setAttribute("opacity", "0.7");
-      edgeLayer.appendChild(path);
+      const key = model.name < relation.to ? `${model.name}::${relation.to}` : `${relation.to}::${model.name}`;
+      const entry = relationMap.get(key) || {
+        models: [model.name, relation.to].sort(),
+        sides: {},
+      };
+      entry.sides[model.name] = {
+        isList: relation.type.includes("[]"),
+        isOptional: relation.type.includes("?") && !relation.type.includes("[]"),
+      };
+      relationMap.set(key, entry);
     });
+  });
+
+  relationMap.forEach((entry) => {
+    const [modelA, modelB] = entry.models;
+    const modelPosA = state.nodePositions[modelA];
+    const modelPosB = state.nodePositions[modelB];
+    if (!modelPosA || !modelPosB) return;
+
+    const x1 = modelPosA.x + modelPosA.width;
+    const y1 = modelPosA.y + modelPosA.height / 2;
+    const x2 = modelPosB.x;
+    const y2 = modelPosB.y + modelPosB.height / 2;
+    const bend = Math.max(40, Math.abs(x2 - x1) * 0.45);
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "var(--edge)");
+    path.setAttribute("stroke-width", "1.3");
+    path.setAttribute("opacity", "0.7");
+    edgeLayer.appendChild(path);
+
+    const label = getRelationEdgeLabel(entry.sides[modelA], entry.sides[modelB]);
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("class", "edge-label");
+    text.setAttribute("x", String((x1 + x2) / 2));
+    text.setAttribute("y", String((y1 + y2) / 2 - 6));
+    text.textContent = label;
+    edgeLayer.appendChild(text);
   });
 }
 
